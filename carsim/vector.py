@@ -1,6 +1,9 @@
+from typing import Union
+
+
 class Vector:
 
-    def __init__(self, x: int = None, y: int = None):
+    def __init__(self, x: Union[int, float] = None, y: Union[int, float] = None):
         if x is None:
             self.x = 0
             self.y = 0
