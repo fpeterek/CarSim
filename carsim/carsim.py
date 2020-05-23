@@ -13,6 +13,9 @@ def main():
     width, height = (1400, 750)
     screen = pygame.display.set_mode((width, height))
 
+    pygame.font.init()
+    font = pygame.font.SysFont('Helvetica', 16)
+
     pygame.display.set_caption('CarSim')
     screen.fill(background_colour)
     pygame.display.flip()
@@ -43,6 +46,10 @@ def main():
 
         screen.fill(background_colour)
         screen.blit(car.image, car.rect)
+
+        speed = font.render(f'v={round(car.velocity)} kmh', False, (0, 0, 0))
+        screen.blit(speed, (width-speed.get_width()-5, 5))
+
         pygame.display.flip()
 
         current = time.time_ns()

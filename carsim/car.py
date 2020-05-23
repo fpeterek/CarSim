@@ -12,10 +12,10 @@ class Car(Sprite):
     default_weight = 1800  # kg
     default_top_speed = 230  # km/h
     sprite_dim = (32, 15)
-    default_brake_force = 50
+    default_brake_force = 30
     default_acceleration = 30
-    default_deceleration = 10
-    default_rotation = 15
+    default_deceleration = 0.05
+    default_rotation = 30
 
     def __init__(self, x, y):
         Sprite.__init__(self)
@@ -31,6 +31,10 @@ class Car(Sprite):
 
         self._velocity = 0.0
         self._rotation = 0.0
+
+        self.acc_t = 0
+        self.is_acc = 0
+
         self.weight = Car.default_weight
         self.acceleration = Car.default_acceleration
         self.deceleration = Car.default_deceleration
@@ -50,13 +54,24 @@ class Car(Sprite):
 
         return Vector(fx, fy)
 
-    def accelerate(self, dt):
-        self._velocity += dt * self.acceleration
-        self._velocity = min(self._velocity, self.top_speed)
+    @property
+    def velocity(self):
+        return self._velocity
 
-    def decelerate(self, dt):
-        self._velocity -= dt * self.deceleration
-        self._velocity = max(self._velocity, 0)
+    def accelerate(self, dt):
+        self.acc_t += dt
+        self.is_acc = True
+
+    def acc_fun(self):
+        t = self.acc_t
+        return 20*t - t**2 + 0.02*t**3
+
+    def calc_velocity(self, dt):
+        if self.is_acc:
+            self._velocity = min(self.top_speed, self.acc_fun())
+        else:
+            self._velocity -= dt * max(self.deceleration * ((self._velocity/10)**2), 1)
+            self._velocity = max(self._velocity, 0)
 
     def apply_brake(self, dt):
         self._velocity -= dt * self.brake_force
@@ -69,7 +84,7 @@ class Car(Sprite):
             self._rotation += 360
 
     def rotate(self, dt, v):
-        self._rotation += v * dt
+        self._rotation += v * dt * (self._velocity / self.top_speed * 5)
         self.bound_rotation()
         self.image = pygame.transform.rotate(self.orig_image, 360.0 - self._rotation)
 
@@ -93,5 +108,6 @@ class Car(Sprite):
         self.update_rect()
 
     def update(self, dt):
-        self.decelerate(dt)
+        self.calc_velocity(dt)
+        self.is_acc = False
         self.move(dt)
