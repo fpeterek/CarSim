@@ -10,7 +10,7 @@ def main():
     exit_keys = (pygame.K_q, pygame.K_ESCAPE)
 
     background_colour = (255, 255, 255)
-    width, height = (1600, 900)
+    width, height = (1400, 750)
     screen = pygame.display.set_mode((width, height))
 
     pygame.display.set_caption('CarSim')
@@ -36,9 +36,12 @@ def main():
             car.rotate_left(dt)
         if pressed[pygame.K_d]:
             car.rotate_right(dt)
+        if pressed[pygame.K_s]:
+            car.apply_brake(dt)
 
         car.update(dt)
 
+        screen.fill(background_colour)
         screen.blit(car.image, car.rect)
         pygame.display.flip()
 
