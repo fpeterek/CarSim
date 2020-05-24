@@ -41,13 +41,16 @@ def main():
             car.rotate_right(dt)
         if pressed[pygame.K_s]:
             car.apply_brake(dt)
+        if pressed[pygame.K_SPACE]:
+            car.accelerate(100)
 
         car.update(dt)
 
         screen.fill(background_colour)
+        pygame.draw.rect(screen, (255, 0, 0), car.rect)
         screen.blit(car.image, car.rect)
 
-        speed = font.render(f'v={round(car.velocity)} kmh', False, (0, 0, 0))
+        speed = font.render(f'v={round(car.velocity)} kmh', True, (0, 0, 0))
         screen.blit(speed, (width-speed.get_width()-5, 5))
 
         pygame.display.flip()

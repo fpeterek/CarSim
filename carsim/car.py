@@ -87,6 +87,8 @@ class Car(Sprite):
         self._rotation += v * dt * (self._velocity / self.top_speed * 5)
         self.bound_rotation()
         self.image = pygame.transform.rotate(self.orig_image, 360.0 - self._rotation)
+        self.rect = self.image.get_rect()
+        self.update_rect()
 
     def rotate_left(self, dt):
         self.rotate(dt, -self.rotation_speed)
