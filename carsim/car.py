@@ -64,11 +64,11 @@ class Car(Sprite):
 
     def acc_fun(self):
         t = self.acc_t
-        return 20*t - t**2 + 0.02*t**3
+        return 88.777 * math.log(0.34 * (t+2.94118))
 
     def calc_velocity(self, dt):
         if self.is_acc:
-            self._velocity = min(self.top_speed, self.acc_fun())
+            self._velocity = min(self.top_speed, int(self.acc_fun()))
         else:
             self._velocity -= dt * max(self.deceleration * ((self._velocity/10)**2), 1)
             self._velocity = max(self._velocity, 0)
