@@ -31,6 +31,11 @@ def main():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key in exit_keys):
                 running = False
                 break
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                if car.cruise_control_on:
+                    car.disable_cruise_control()
+                else:
+                    car.enable_cruise_control(130)
 
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_w]:
@@ -52,6 +57,9 @@ def main():
 
         speed = font.render(f'v={round(car.velocity)} kmh', True, (0, 0, 0))
         screen.blit(speed, (width-speed.get_width()-5, 5))
+
+        cc = font.render(f'CC {("off", "on")[car.cruise_control_on]}', True, (0, 0, 0))
+        screen.blit(cc, (width-cc.get_width()-5, 10 + speed.get_height()))
 
         pygame.display.flip()
 

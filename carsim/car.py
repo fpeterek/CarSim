@@ -32,7 +32,10 @@ class Car(Sprite):
         self._velocity = 0.0
         self._rotation = 0.0
 
+        self.target_velocity = -1
+
         self.is_acc = False
+        self.v_input_received = False
 
         self.weight = Car.default_weight
         self.acceleration = Car.default_acceleration
@@ -57,10 +60,30 @@ class Car(Sprite):
     def velocity(self):
         return self._velocity
 
+    @property
+    def cruise_control_on(self):
+        return not (self.target_velocity < 0)
+
+    @property
+    def should_acc(self):
+        return self.cruise_control_on and self._velocity < self.target_velocity and not self.v_input_received
+
+    @property
+    def should_brake(self):
+        return self.cruise_control_on and self._velocity > self.target_velocity + 3 and not self.v_input_received
+
+    def enable_cruise_control(self, target):
+        self.target_velocity = target
+
+    def disable_cruise_control(self):
+        self.target_velocity = -1
+
     def full_speed(self):
+        self.v_input_received = True
         self._velocity = self.top_speed
 
     def accelerate(self):
+        self.v_input_received = True
         self.is_acc = True
 
     def inverse_acc(self):
@@ -70,16 +93,45 @@ class Car(Sprite):
         t = self.inverse_acc() + dt
         return 88.777 * math.log(0.34 * (t+2.94118))
 
-    def calc_velocity(self, dt):
-        if self.is_acc:
-            self._velocity = min(float(self.top_speed), self.acc_fun(dt))
+    def _acc(self, dt):
+        new = self.acc_fun(dt)
+
+        if self.cruise_control_on and new > self.target_velocity and not self.v_input_received:
+            self._velocity = self.target_velocity
         else:
-            self._velocity -= dt * max(self.deceleration * ((self._velocity/10)**2), 1)
-            self._velocity = max(self._velocity, 0)
+            self._velocity = min(float(self.top_speed), new)
+
+    def _dec(self, dt):
+        delta = dt * max(self.deceleration * ((self._velocity / 10) ** 2), 1)
+
+        if not self.v_input_received and self.cruise_control_on and self._velocity-delta < self.cruise_control_on:
+            self._velocity = self.target_velocity
+        else:
+            self._velocity -= delta
+
+        self._velocity = max(self._velocity, 0)
+
+    def _brake(self, dt):
+        delta = dt * self.brake_force
+
+        if self.v_input_received or (self.cruise_control_on and self._velocity - delta > self.target_velocity):
+            self._velocity -= dt * self.brake_force
+        else:
+            self._velocity = self.target_velocity
+
+        self._velocity = max(self._velocity, 0)
+
+    def calc_velocity(self, dt):
+        if self.is_acc or self.should_acc:
+            self._acc(dt)
+        else:
+            self._dec(dt)
+            if self.cruise_control_on and self.should_brake:
+                self._brake(dt)
 
     def apply_brake(self, dt):
-        self._velocity -= dt * self.brake_force
-        self._velocity = max(self._velocity, 0)
+        self.v_input_received = True
+        self._brake(dt)
 
     def bound_rotation(self):
         if self._rotation > 360:
@@ -116,4 +168,5 @@ class Car(Sprite):
     def update(self, dt):
         self.calc_velocity(dt)
         self.is_acc = False
+        self.v_input_received = False
         self.move(dt)
