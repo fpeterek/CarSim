@@ -34,7 +34,7 @@ def main():
 
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_w]:
-            car.accelerate(dt)
+            car.accelerate()
         if pressed[pygame.K_a]:
             car.rotate_left(dt)
         if pressed[pygame.K_d]:
@@ -42,7 +42,7 @@ def main():
         if pressed[pygame.K_s]:
             car.apply_brake(dt)
         if pressed[pygame.K_SPACE]:
-            car.accelerate(100)
+            car.full_speed()
 
         car.update(dt)
 

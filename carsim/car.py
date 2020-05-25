@@ -12,7 +12,7 @@ class Car(Sprite):
     default_weight = 1800  # kg
     default_top_speed = 230  # km/h
     sprite_dim = (32, 15)
-    default_brake_force = 30
+    default_brake_force = 15
     default_acceleration = 30
     default_deceleration = 0.05
     default_rotation = 30
@@ -32,8 +32,7 @@ class Car(Sprite):
         self._velocity = 0.0
         self._rotation = 0.0
 
-        self.acc_t = 0
-        self.is_acc = 0
+        self.is_acc = False
 
         self.weight = Car.default_weight
         self.acceleration = Car.default_acceleration
@@ -58,17 +57,22 @@ class Car(Sprite):
     def velocity(self):
         return self._velocity
 
-    def accelerate(self, dt):
-        self.acc_t += dt
+    def full_speed(self):
+        self._velocity = self.top_speed
+
+    def accelerate(self):
         self.is_acc = True
 
-    def acc_fun(self):
-        t = self.acc_t
+    def inverse_acc(self):
+        return -2.94118 * (1 - math.e**(0.0112642 * self.velocity))
+
+    def acc_fun(self, dt):
+        t = self.inverse_acc() + dt
         return 88.777 * math.log(0.34 * (t+2.94118))
 
     def calc_velocity(self, dt):
         if self.is_acc:
-            self._velocity = min(self.top_speed, int(self.acc_fun()))
+            self._velocity = min(float(self.top_speed), self.acc_fun(dt))
         else:
             self._velocity -= dt * max(self.deceleration * ((self._velocity/10)**2), 1)
             self._velocity = max(self._velocity, 0)
