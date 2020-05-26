@@ -3,11 +3,12 @@ import time
 import pygame
 
 from car import Car
+from direction import Direction
 
 
 def main():
 
-    exit_keys = (pygame.K_q, pygame.K_ESCAPE)
+    exit_keys = (pygame.K_ESCAPE, )
 
     background_colour = (255, 255, 255)
     width, height = (1400, 750)
@@ -37,13 +38,25 @@ def main():
                 else:
                     car.enable_cruise_control(130)
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                if car.front_wheel.has_target and car.front_wheel.target_rotation < 0:
+                    car.unset_steer_target()
+                else:
+                    car.steer_target(20, Direction.LEFT)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                if car.front_wheel.has_target and car.front_wheel.target_rotation > 0:
+                    car.unset_steer_target()
+                else:
+                    car.steer_target(20, Direction.RIGHT)
+
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_w]:
             car.accelerate()
         if pressed[pygame.K_a]:
-            car.rotate_left(dt)
+            car.steer_left(dt)
         if pressed[pygame.K_d]:
-            car.rotate_right(dt)
+            car.steer_right(dt)
         if pressed[pygame.K_s]:
             car.apply_brake(dt)
         if pressed[pygame.K_SPACE]:
@@ -60,6 +73,12 @@ def main():
 
         cc = font.render(f'CC {("off", "on")[car.cruise_control_on]}', True, (0, 0, 0))
         screen.blit(cc, (width-cc.get_width()-5, 10 + speed.get_height()))
+
+        wheel = font.render(f'Wheel: {round(car.front_wheel.rotation)}°', True, (0, 0, 0))
+        screen.blit(wheel, (width - wheel.get_width() - 5, 15 + speed.get_height()*2))
+
+        target = font.render(f'Target: {round(car.front_wheel.target_rotation)}°', True, (0, 0, 0))
+        screen.blit(target, (width - target.get_width() - 5, 20 + speed.get_height() * 3))
 
         pygame.display.flip()
 

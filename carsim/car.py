@@ -5,6 +5,7 @@ from pygame.sprite import Sprite
 import pygame
 
 from vector import Vector
+from wheels import Wheel
 
 
 class Car(Sprite):
@@ -15,7 +16,6 @@ class Car(Sprite):
     default_brake_force = 15
     default_acceleration = 30
     default_deceleration = 0.05
-    default_rotation = 30
 
     def __init__(self, x, y):
         Sprite.__init__(self)
@@ -37,10 +37,11 @@ class Car(Sprite):
         self.is_acc = False
         self.v_input_received = False
 
+        self.front_wheel = Wheel()
+
         self.weight = Car.default_weight
         self.acceleration = Car.default_acceleration
         self.deceleration = Car.default_deceleration
-        self.rotation_speed = Car.default_rotation
         self.brake_force = Car.default_brake_force
         self.top_speed = Car.default_top_speed
 
@@ -146,11 +147,17 @@ class Car(Sprite):
         self.rect = self.image.get_rect()
         self.update_rect()
 
-    def rotate_left(self, dt):
-        self.rotate(dt, -self.rotation_speed)
+    def steer_left(self, dt):
+        self.front_wheel.steer_left(dt)
 
-    def rotate_right(self, dt):
-        self.rotate(dt, self.rotation_speed)
+    def steer_right(self, dt):
+        self.front_wheel.steer_right(dt)
+
+    def steer_target(self, deg, direction):
+        self.front_wheel.set_target(deg, direction)
+
+    def unset_steer_target(self):
+        self.front_wheel.unset_target()
 
     def update_rect(self):
         w = self.rect.width
@@ -166,6 +173,8 @@ class Car(Sprite):
         self.update_rect()
 
     def update(self, dt):
+        self.front_wheel.update(dt)
+        self.rotate(dt, self.front_wheel.rotation)
         self.calc_velocity(dt)
         self.is_acc = False
         self.v_input_received = False
