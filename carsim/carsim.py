@@ -67,6 +67,7 @@ def main():
         screen.fill(background_colour)
         pygame.draw.rect(screen, (255, 0, 0), car.rect)
         screen.blit(car.image, car.rect)
+        pygame.draw.line(screen, car.sensor.color, car.sensor.center, car.sensor.get_end(), 2)
 
         speed = font.render(f'v={round(car.velocity)} kmh', True, (0, 0, 0))
         screen.blit(speed, (width-speed.get_width()-5, 5))

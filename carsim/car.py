@@ -4,6 +4,7 @@ from pygame.rect import Rect
 from pygame.sprite import Sprite
 import pygame
 
+from sensor import Sensor
 from vector import Vector
 from wheels import Wheel
 
@@ -38,6 +39,8 @@ class Car(Sprite):
         self.v_input_received = False
 
         self.front_wheel = Wheel()
+        self.sensor = Sensor((0, 0))
+        self.update_sensor()
 
         self.weight = Car.default_weight
         self.acceleration = Car.default_acceleration
@@ -164,6 +167,11 @@ class Car(Sprite):
         h = self.rect.height
         self.rect = Rect(self.x, self.y, w, h)
 
+    def update_sensor(self):
+        x = self.x + (self.image.get_rect().width / 2)
+        y = self.y + (self.image.get_rect().height / 2)
+        self.sensor.center = (x, y)
+
     def move(self, dt):
         f = self.forces
         dx = f.x * dt
@@ -171,9 +179,11 @@ class Car(Sprite):
         self.x += dx
         self.y += dy
         self.update_rect()
+        self.update_sensor()
 
     def update(self, dt):
         self.front_wheel.update(dt)
+        self.sensor.update(dt)
         self.rotate(dt, self.front_wheel.rotation)
         self.calc_velocity(dt)
         self.is_acc = False
