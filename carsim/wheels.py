@@ -6,7 +6,7 @@ class Wheel:
     def __init__(self):
         self.rotation = 0.0
         self.deg_per_second = 30.0
-        self.max_rotation = 30.0
+        self.max_rotation = 20.0
 
         self.target_rotation = 0.0
 

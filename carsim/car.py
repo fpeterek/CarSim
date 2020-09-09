@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 from pygame.rect import Rect
 from pygame.sprite import Sprite
@@ -47,6 +48,10 @@ class Car(Sprite):
         self.deceleration = Car.default_deceleration
         self.brake_force = Car.default_brake_force
         self.top_speed = Car.default_top_speed
+
+    @property
+    def position(self) -> Tuple[float, float]:
+        return self.x, self.y
 
     @property
     def rotation(self):

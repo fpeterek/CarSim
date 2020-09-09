@@ -4,6 +4,9 @@ import pygame
 
 from car import Car
 from direction import Direction
+from path_planner import PathPlanner
+from position_tracker import PositionTracker
+from waypoint import Waypoint
 
 
 def main():
@@ -22,21 +25,31 @@ def main():
     pygame.display.flip()
     running = True
 
+    waypoints = []
+
     car = Car(width/2, height/2)
 
     dt = 0
     last = time.time_ns()
+
+    pt = PositionTracker()
+    pp = PathPlanner(car, pt)
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key in exit_keys):
                 running = False
                 break
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                waypoints.append(Waypoint(x, y))
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 if car.cruise_control_on:
                     car.disable_cruise_control()
                 else:
-                    car.enable_cruise_control(130)
+                    car.enable_cruise_control(80)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 if car.front_wheel.has_target and car.front_wheel.target_rotation < 0:
@@ -64,10 +77,20 @@ def main():
 
         car.update(dt)
 
+        if car.velocity:
+            pt.add(car.position)
+
+        pp.plan(waypoints)
+
         screen.fill(background_colour)
+
+        for wp in waypoints:
+            pygame.draw.circle(screen, Waypoint.sec_color, (wp.x, wp.y), wp.tolerance)
+            pygame.draw.circle(screen, Waypoint.color, (wp.x, wp.y), wp.radius)
+
         pygame.draw.rect(screen, (255, 0, 0), car.rect)
         screen.blit(car.image, car.rect)
-        pygame.draw.line(screen, car.sensor.color, car.sensor.center, car.sensor.get_end(), 2)
+        # pygame.draw.line(screen, car.sensor.color, car.sensor.center, car.sensor.get_end(), 2)
 
         speed = font.render(f'v={round(car.velocity)} kmh', True, (0, 0, 0))
         screen.blit(speed, (width-speed.get_width()-5, 5))
@@ -80,6 +103,12 @@ def main():
 
         target = font.render(f'Target: {round(car.front_wheel.target_rotation)}°', True, (0, 0, 0))
         screen.blit(target, (width - target.get_width() - 5, 20 + speed.get_height() * 3))
+
+        rot = font.render(f'Car rotation: {None if pt.rotation is None else round(pt.rotation * 100) / 100}°', True, (0, 0, 0))
+        screen.blit(rot, (width - rot.get_width() - 5, 25 + speed.get_height() * 4))
+
+        des = font.render(f'Desired rotation: {None if pp.desired_heading is None else round(pp.desired_heading * 100) / 100}°', True, (0, 0, 0))
+        screen.blit(des, (width - des.get_width() - 5, 30 + speed.get_height() * 5))
 
         pygame.display.flip()
 
