@@ -14,11 +14,16 @@ class PathPlanner:
         self.pt = pt
 
     @staticmethod
+    def sign(x: float) -> float:
+        return -1 if x < 0 else 1
+
+    @staticmethod
     def calc_angle(cur: float, des: float) -> float:
         cur += 360 if cur == 0 else 0
         des += 360 if des == 0 else 0
         dist = des - cur
-        return (360 - abs(dist)) * [-1, 1][dist > 0] if abs(dist) > 180 else dist
+        dist2 = (360 - abs(dist)) * PathPlanner.sign(dist) * -1
+        return dist if abs(dist) < abs(dist2) else dist2
 
     def adjust_steering(self):
 

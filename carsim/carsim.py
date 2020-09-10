@@ -88,7 +88,7 @@ def main():
             pygame.draw.circle(screen, Waypoint.sec_color, (wp.x, wp.y), wp.tolerance)
             pygame.draw.circle(screen, Waypoint.color, (wp.x, wp.y), wp.radius)
 
-        pygame.draw.rect(screen, (255, 0, 0), car.rect)
+        # pygame.draw.rect(screen, (255, 0, 0), car.rect)
         screen.blit(car.image, car.rect)
         # pygame.draw.line(screen, car.sensor.color, car.sensor.center, car.sensor.get_end(), 2)
 
